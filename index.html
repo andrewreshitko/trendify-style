@@ -4,11 +4,36 @@
   <meta charset="UTF-8">
   <title>Генерація опису товару</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    label { display: block; margin-top: 10px; }
-    textarea, input { width: 100%; margin-top: 5px; padding: 8px; }
-    button { margin-top: 15px; padding: 10px 20px; font-size: 16px; }
-    .result { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    #response {
+      margin-top: 30px;
+      padding: 15px;
+      background: #f4f4f4;
+      border-left: 4px solid #00b894;
+    }
   </style>
 </head>
 <body>
@@ -19,19 +44,27 @@
     <label for="productId">ID товару:</label>
     <input type="text" id="productId" name="productId" required>
 
+    <label for="model">Модель:</label>
+    <input type="text" id="model" name="model">
+
+    <label for="price">Ціна:</label>
+    <input type="text" id="price" name="price">
+
     <label for="rawInput">Вхідні дані (чернетка опису):</label>
     <textarea id="rawInput" name="rawInput" rows="6" required></textarea>
 
     <button type="submit">Згенерувати</button>
   </form>
 
-  <div id="response" style="display:none;" class="result"></div>
+  <div id="response" style="display:none;"></div>
 
   <script>
     document.getElementById("generateForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
       const id = document.getElementById("productId").value;
+      const model = document.getElementById("model").value;
+      const price = document.getElementById("price").value;
       const raw = document.getElementById("rawInput").value;
       const responseDiv = document.getElementById("response");
 
@@ -42,21 +75,20 @@
         const res = await fetch("https://n8n.trendify.style/webhook-test/0f3d67fb-d9f5-460b-bef4-3d037d441399", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, raw })
+          body: JSON.stringify({ id, model, price, raw })
         });
 
         if (!res.ok) throw new Error("Помилка при з'єднанні з n8n");
 
-        const json = await res.json();
+        const data = await res.json();
 
-        // Перевірка на масив
-        const output = Array.isArray(json) ? json[0] : json;
+        const item = Array.isArray(data) ? data[0] : data;
 
         responseDiv.innerHTML = `
           ✅ <strong>Згенерована відповідь:</strong><br><br>
-          <strong>📌 Назва:</strong><br>${output.title}<br><br>
-          <strong>📝 Опис:</strong><br>${output.description}<br><br>
-          <strong>🏷️ Ключові слова:</strong><br>${output.keywords}
+          <strong>Заголовок:</strong> ${item.title || "—"}<br><br>
+          <strong>Опис:</strong><br>${item.description || "—"}<br><br>
+          <strong>Ключові слова:</strong><br>${item.keywords || "—"}
         `;
       } catch (err) {
         responseDiv.innerHTML = `❌ Сталася помилка: ${err.message}`;
