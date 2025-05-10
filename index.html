@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Генерація опису товару</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background-color: #f9f9f9;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #response {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #eef;
+      border-left: 5px solid #4CAF50;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Генерація опису товару</h2>
+
+  <form id="generateForm">
+    <label for="productId">ID товару:</label>
+    <input type="text" id="productId" name="productId" required>
+
+    <label for="rawInput">Вхідні дані (чернетка опису):</label>
+    <textarea id="rawInput" name="rawInput" rows="6" required></textarea>
+
+    <button type="submit">Згенерувати</button>
+  </form>
+
+  <div id="response" style="display:none;"></div>
+
+  <script>
+    document.getElementById("generateForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const id = document.getElementById("productId").value;
+      const raw = document.getElementById("rawInput").value;
+      const responseDiv = document.getElementById("response");
+
+      responseDiv.style.display = "block";
+      responseDiv.innerHTML = "⏳ Генеруємо...";
+
+      try {
+        const res = await fetch("https://твій-n8n-домен/webhook/назва", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, raw })
+        });
+
+        if (!res.ok) throw new Error("Помилка при з'єднанні з n8n");
+
+        const data = await res.json();
+
+        responseDiv.innerHTML = `✅ <strong>Згенерована відповідь:</strong>\n\n${data.generated}`;
+      } catch (err) {
+        responseDiv.innerHTML = `❌ Сталася помилка: ${err.message}`;
+      }
+    });
+  </script>
+
+</body>
+</html>
