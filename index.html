@@ -91,8 +91,15 @@
         if (!res.ok) throw new Error("Помилка при з'єднанні з n8n");
 
         const data = await res.json();
+        console.log(data);  // Для перевірки, що прийшло від сервера
 
-        responseDiv.innerHTML = `✅ <strong>Згенерована відповідь:</strong>\n\n${data.generated}`;
+        // Оновлений код для правильного відображення:
+        responseDiv.innerHTML = `
+          ✅ <strong>Згенерована відповідь:</strong><br>
+          <strong>Title:</strong> ${data.generatedTitle || 'Не згенеровано'} <br>
+          <strong>Description:</strong> ${data.generatedDescription || 'Не згенеровано'} <br>
+          <strong>Keywords:</strong> ${data.generatedKeywords || 'Не згенеровано'}
+        `;
       } catch (err) {
         responseDiv.innerHTML = `❌ Сталася помилка: ${err.message}`;
       }
@@ -100,4 +107,5 @@
   </script>
 
 </body>
+
 </html>
