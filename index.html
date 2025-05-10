@@ -4,30 +4,11 @@
   <meta charset="UTF-8">
   <title>Генерація опису товару</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-    }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
-
-    textarea, input, button {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      font-size: 1rem;
-    }
-
-    .output-block {
-      background: #f5f5f5;
-      padding: 1rem;
-      margin-top: 1rem;
-      border-left: 5px solid #4caf50;
-      white-space: pre-wrap;
-    }
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    label { display: block; margin-top: 10px; }
+    textarea, input { width: 100%; margin-top: 5px; padding: 8px; }
+    button { margin-top: 15px; padding: 10px 20px; font-size: 16px; }
+    .result { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
   </style>
 </head>
 <body>
@@ -44,12 +25,7 @@
     <button type="submit">Згенерувати</button>
   </form>
 
-  <div id="response" style="margin-top: 2rem; display: none;">
-    <h3>✅ Згенеровані дані:</h3>
-    <div id="titleBlock" class="output-block"></div>
-    <div id="descriptionBlock" class="output-block"></div>
-    <div id="keywordsBlock" class="output-block"></div>
-  </div>
+  <div id="response" style="display:none;" class="result"></div>
 
   <script>
     document.getElementById("generateForm").addEventListener("submit", async function(e) {
@@ -57,16 +33,10 @@
 
       const id = document.getElementById("productId").value;
       const raw = document.getElementById("rawInput").value;
-
       const responseDiv = document.getElementById("response");
-      const titleBlock = document.getElementById("titleBlock");
-      const descriptionBlock = document.getElementById("descriptionBlock");
-      const keywordsBlock = document.getElementById("keywordsBlock");
 
       responseDiv.style.display = "block";
-      titleBlock.textContent = "⏳ Генеруємо...";
-      descriptionBlock.textContent = "";
-      keywordsBlock.textContent = "";
+      responseDiv.innerHTML = "⏳ Генеруємо...";
 
       try {
         const res = await fetch("https://n8n.trendify.style/webhook-test/0f3d67fb-d9f5-460b-bef4-3d037d441399", {
@@ -77,14 +47,19 @@
 
         if (!res.ok) throw new Error("Помилка при з'єднанні з n8n");
 
-        const data = await res.json();
-        const result = Array.isArray(data) ? data[0] : data;
+        const json = await res.json();
 
-        titleBlock.innerHTML = `<strong>Заголовок:</strong><br>${result.title || '—'}`;
-        descriptionBlock.innerHTML = `<strong>Опис:</strong><br>${result.description || '—'}`;
-        keywordsBlock.innerHTML = `<strong>Ключові слова:</strong><br>${result.keywords || '—'}`;
+        // Перевірка на масив
+        const output = Array.isArray(json) ? json[0] : json;
+
+        responseDiv.innerHTML = `
+          ✅ <strong>Згенерована відповідь:</strong><br><br>
+          <strong>📌 Назва:</strong><br>${output.title}<br><br>
+          <strong>📝 Опис:</strong><br>${output.description}<br><br>
+          <strong>🏷️ Ключові слова:</strong><br>${output.keywords}
+        `;
       } catch (err) {
-        titleBlock.textContent = `❌ Сталася помилка: ${err.message}`;
+        responseDiv.innerHTML = `❌ Сталася помилка: ${err.message}`;
       }
     });
   </script>
