@@ -80,4 +80,34 @@
         const res = await fetch("https://n8n.trendify.style/webhook/0f3d67fb-d9f5-460b-bef4-3d037d441399", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, model,
+          body: JSON.stringify({ id, model, price, raw })
+        });
+
+        if (!res.ok) throw new Error("Помилка при з'єднанні з n8n");
+
+        const data = await res.json();
+        const item = Array.isArray(data) ? data[0] : data;
+
+        responseDiv.innerHTML = `
+          ✅ <strong>Згенерована відповідь:</strong><br><br>
+
+          <div class="lang-section">
+            <strong>Заголовок (укр):</strong><br>${item.title || "—"}<br><br>
+            <strong>Опис:</strong><br>${item.description || "—"}<br><br>
+            <strong>Ключові слова (укр):</strong><br>${item.keywords || "—"}
+          </div>
+
+          <div class="lang-section">
+            <hr>
+            <strong>Заголовок (рос):</strong><br>${item.title_ru || "—"}<br><br>
+            <strong>Ключові слова (рос):</strong><br>${item.keywords_ru || "—"}
+          </div>
+        `;
+      } catch (err) {
+        responseDiv.innerHTML = `❌ Сталася помилка: ${err.message}`;
+      }
+    });
+  </script>
+
+</body>
+</html>
